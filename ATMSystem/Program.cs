@@ -1,45 +1,41 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using ATMSystem.Business.Abstract;
+using ATMSystem.Business.Concrete;
+using ATMSystem.Data.Abstract;
 using ATMSystem.Data.Concrete;
-using ATMSystem.Entities;
-using ATMSystem.UI;
-using ATMSystem.Utilities;
+using ATMSystem.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 
+IHost host = CreateHostBuilder(args).Build();
+var scope = host.Services.CreateScope();
+var services = scope.ServiceProvider;
 
-Screen.WelcomeScreen();
-while (true)
+try
 {
+    services.GetRequiredService<BankApp>().Execute();
+}
+catch (Exception e)
+{
+    Console.WriteLine(e.Message);
+}
 
-    switch (InputFunc.GetValidInt64Input("Seçiminizi"))
+
+IHostBuilder CreateHostBuilder(string[] strings)
+{
+    return Host.CreateDefaultBuilder()
+    .ConfigureServices((_, services) =>
     {
-        case 1:
-            {
-                CheckCardNoPassword();
-            }
-            break;
-        case 2:
-            {
-                Environment.Exit(1);
-            }
-            break;
-        default:
-            break;
-    }
+        services.AddScoped<ICardRepository, CardRepository>();
+        services.AddScoped<ICardService, CardManager>();
+        services.AddScoped<IATMService, ATMManager>();
+        services.AddSingleton<BankApp>();
+    });
 }
 
-static void CheckCardNoPassword()
-{
-     Card selectedCard;
-     bool pass = false;
-     Console.WriteLine("\nNot: Lütfen Kart Numaranızı Doğru Bir Şekilde Giriniz");
-     var cardNumber = InputFunc.GetValidInt64Input("ATM Kart Numaranızı");
 
-     Console.Write("Şifrenizi Girin: ");
-     var pinCode = Convert.ToInt32(InputFunc.GetHiddenConsoleInput());
 
-     Console.Write("\nLütfen Bekleyin! Bilgileriniz Kontrol Ediliyor.\n");
-     InputFunc.Animation();
 
-   
 
-}
+
